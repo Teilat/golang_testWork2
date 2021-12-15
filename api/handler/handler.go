@@ -5,18 +5,18 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"src/golang_testWork2/vault"
-	"src/golang_testWork2/vault/record"
+	"src/golang_testWork2/cache"
+	"src/golang_testWork2/cache/record"
 	"time"
 )
 
 type HandlerFunc func(w http.ResponseWriter, r *http.Request)
 
 type Handlers struct {
-	cache vault.Vault
+	cache cache.Cache
 }
 
-func New(cache *vault.Vault) *Handlers {
+func New(cache *cache.Cache) *Handlers {
 	return &Handlers{
 		cache: *cache,
 	}

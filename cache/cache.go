@@ -1,21 +1,21 @@
-package vault
+package cache
 
 import (
 	"context"
 	"fmt"
 	"log"
-	"src/golang_testWork2/vault/record"
+	"src/golang_testWork2/cache/record"
 	"time"
 )
 
-type Vault struct {
+type Cache struct {
 	data    map[string]*record.Record
 	context context.Context
 	ticker  time.Ticker
 }
 
-func NewVault(ctx context.Context, ticker time.Ticker) *Vault {
-	return &Vault{
+func New(ctx context.Context, ticker time.Ticker) *Cache {
+	return &Cache{
 		data:    make(map[string]*record.Record, 0),
 		context: ctx,
 		ticker:  ticker,
@@ -23,7 +23,7 @@ func NewVault(ctx context.Context, ticker time.Ticker) *Vault {
 }
 
 //Get возвращает запись по заданному ключу
-func (v Vault) Get(key string) (*record.Record, error) {
+func (v Cache) Get(key string) (*record.Record, error) {
 	res := v.data[key]
 	if res != nil {
 		return res, nil
@@ -33,7 +33,7 @@ func (v Vault) Get(key string) (*record.Record, error) {
 }
 
 //GetAll возвращает все записи из хранилища в виде списка
-func (v Vault) GetAll() []*record.Record {
+func (v Cache) GetAll() []*record.Record {
 	res := make([]*record.Record, 0)
 	for _, i2 := range v.data {
 		res = append(res, i2)
@@ -42,13 +42,13 @@ func (v Vault) GetAll() []*record.Record {
 }
 
 //Add добавляет запись в хранилище
-func (v Vault) Add(rec *record.Record) {
+func (v Cache) Add(rec *record.Record) {
 	v.data[rec.Key] = rec
 	log.Print("added key:", rec.Key)
 }
 
 //Remove удаляет значение по заданному ключу. При неудаче возвращает ошибку
-func (v Vault) Remove(key string) error {
+func (v Cache) Remove(key string) error {
 	rec := v.data[key]
 	if rec != nil {
 		delete(v.data, key)
@@ -60,12 +60,12 @@ func (v Vault) Remove(key string) error {
 }
 
 // Flush очищает хранилище с оперативными данными
-func (v Vault) Flush() {
+func (v Cache) Flush() {
 	v.data = make(map[string]*record.Record, 0)
 }
 
 //ProcessTimer запускается в горутине и проверяет каждую запись на истечение по времени
-func (v Vault) ProcessTimer() {
+func (v Cache) ProcessTimer() {
 	for {
 		select {
 		case <-v.ticker.C:

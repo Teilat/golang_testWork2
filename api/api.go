@@ -5,13 +5,13 @@ import (
 	"log"
 	"net/http"
 	"src/golang_testWork2/api/handler"
-	"src/golang_testWork2/vault"
+	"src/golang_testWork2/cache"
 )
 
-func Init(cache *vault.Vault)  {
+func Init(cache *cache.Cache) {
 	handlers := api.New(cache)
 	router := mux.NewRouter()
-	router.Handle("/", http.FileServer(http.Dir("./web/static/")))
+	router.Handle("/", http.FileServer(http.Dir("./api/")))
 
 	router.Path("/view").Queries("key", "{key}").HandlerFunc(handlers.HandlerView())
 	router.Path("/view").HandlerFunc(handlers.HandlerView())
