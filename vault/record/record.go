@@ -1,14 +1,14 @@
-package cache
+package record
 
 import "time"
 
 const defaultTTL = time.Minute
 
 type Record struct {
-	creationTime time.Time
-	timeToLive time.Duration
-	key string
-	value string
+	CreationTime time.Time
+	TimeToLive   time.Duration
+	Key          string
+	Value        string
 }
 
 //New создает новую запись.
@@ -16,17 +16,17 @@ type Record struct {
 func New(key, value string, timeToLive time.Duration) *Record {
 	if timeToLive != time.Duration(0) {
 		return &Record{
-			creationTime: time.Now(),
-			timeToLive:   timeToLive,
-			key:          key,
-			value:        value,
+			CreationTime: time.Now(),
+			TimeToLive:   timeToLive,
+			Key:          key,
+			Value:        value,
 		}
-	}else {
+	} else {
 		return &Record{
-			creationTime: time.Now(),
-			timeToLive:   defaultTTL,
-			key:          key,
-			value:        value,
+			CreationTime: time.Now(),
+			TimeToLive:   defaultTTL,
+			Key:          key,
+			Value:        value,
 		}
 	}
 }
