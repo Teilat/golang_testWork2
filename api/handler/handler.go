@@ -60,7 +60,7 @@ func (h *Handlers) HandlerAdd() HandlerFunc {
 		args := mux.Vars(r)
 		if args["key"] != "" && args["value"] != "" {
 			if args["duration"] != "" {
-				ttl, err := time.ParseDuration(args["duration"]+"s")
+				ttl, err := time.ParseDuration(args["duration"] + "s")
 				if err != nil {
 					log.Println(err)
 					_, err := fmt.Fprintf(w, err.Error())
