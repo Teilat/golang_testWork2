@@ -1,10 +1,10 @@
 package vault
 
 import (
-	"./record"
 	"context"
 	"fmt"
 	"log"
+	"src/golang_testWork2/vault/record"
 	"time"
 )
 
@@ -71,7 +71,7 @@ func (v Vault) ProcessTimer() {
 		case <-v.ticker.C:
 			go func() {
 				for s, r := range v.data {
-					isExpired := r.CreationTime.Add(r.TimeToLive).After(time.Now())
+					isExpired := r.CreationTime.Add(r.TimeToLive).Before(time.Now())
 					if isExpired {
 						err := v.Remove(s)
 						if err != nil {
@@ -80,7 +80,7 @@ func (v Vault) ProcessTimer() {
 						}
 					}
 				}
-				log.Print("done")
+				//log.Print("done")
 			}()
 		case <-v.context.Done():
 			return

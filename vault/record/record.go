@@ -12,7 +12,7 @@ type Record struct {
 }
 
 //New создает новую запись.
-//Передавать time.Duration(0) для стандартного времени жизни
+//Передавать time.Duration(0) для стандартного ttl
 func New(key, value string, timeToLive time.Duration) *Record {
 	if timeToLive != time.Duration(0) {
 		return &Record{
