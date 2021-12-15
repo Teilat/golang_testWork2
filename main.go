@@ -1,15 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"time"
 )
-import "./cache"
+import "./vault"
 
 const tickTime = time.Second
 
-func main()  {
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
 	ticker := time.NewTicker(tickTime)
-	go cache.ProcessTimer(ticker)
-	fmt.Scanln()
+	cache := vault.NewVault(ctx, *ticker)
+	defer cancel()
+
 }

@@ -61,5 +61,29 @@ func (v Vault) Remove(key string) error {
 
 // Flush очищает хранилище с оперативными данными
 func (v Vault) Flush() {
-	v.data = make(map[string]*Record, 0)
+	v.data = make(map[string]*record.Record, 0)
+}
+
+//ProcessTimer запускается в горутине и проверяет каждую запись на истечение по времени
+func (v Vault) ProcessTimer() {
+	for {
+		select {
+		case <-v.ticker.C:
+			go func() {
+				for s, r := range v.data {
+					isExpired := r.CreationTime.Add(r.TimeToLive).After(time.Now())
+					if isExpired {
+						err := v.Remove(s)
+						if err != nil {
+							log.Print(err)
+							return
+						}
+					}
+				}
+				log.Print("done")
+			}()
+		case <-v.context.Done():
+			return
+		}
+	}
 }
