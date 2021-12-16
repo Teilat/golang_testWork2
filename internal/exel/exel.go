@@ -12,8 +12,8 @@ import (
 )
 
 type ExelFile struct {
-	filename string
-	data     []byte
+	Filename string
+	Data     []byte
 }
 
 const sheetName = "Sheet1"
@@ -23,23 +23,23 @@ func Excel(rec []*record.Record) ExelFile {
 	err := f.SetCellValue(sheetName, "A1", "Ключ")
 	if err != nil {
 		log.Panicln(err)
-		return ExelFile{filename: "", data: nil}
+		return ExelFile{"", nil}
 	}
 	err = f.SetCellValue(sheetName, "B1", "Значение")
 	if err != nil {
 		log.Panicln(err)
-		return ExelFile{filename: "", data: nil}
+		return ExelFile{"", nil}
 	}
 	for i, r := range rec {
 		err := f.SetCellValue(sheetName, makeAxis(0, i+1), r.Key)
 		if err != nil {
 			log.Panicln(err)
-			return ExelFile{filename: "", data: nil}
+			return ExelFile{"", nil}
 		}
 		err = f.SetCellValue(sheetName, makeAxis(1, i+1), r.Value)
 		if err != nil {
 			log.Panicln(err)
-			return ExelFile{filename: "", data: nil}
+			return ExelFile{"", nil}
 		}
 	}
 	var b bytes.Buffer
@@ -47,10 +47,10 @@ func Excel(rec []*record.Record) ExelFile {
 	err = f.Write(writer)
 	if err != nil {
 		log.Panicln(err)
-		return ExelFile{filename: "", data: nil}
+		return ExelFile{"", nil}
 	}
 	fileName := "cache_data_" + time.Now().String() + ".xlsx"
-	return ExelFile{filename: fileName, data: b.Bytes()}
+	return ExelFile{fileName, nil}
 
 }
 

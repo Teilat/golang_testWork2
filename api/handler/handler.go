@@ -125,6 +125,6 @@ func (h *Handlers) HandlerExel() HandlerFunc {
 		w.Header().Add("Content-Disposition", "Attachment")
 		data := h.cache.GetAll()
 		result := exel.Excel(data)
-		http.ServeContent(w, r, result.filename, time.Now(), bytes.NewReader(result.data))
+		http.ServeContent(w, r, result.Filename, time.Now(), bytes.NewReader(result.Data))
 	}
 }
