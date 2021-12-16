@@ -1,12 +1,14 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"src/golang_testWork2/cache"
-	"src/golang_testWork2/cache/record"
+	"src/golang_testWork2/internal/cache"
+	"src/golang_testWork2/internal/cache/record"
+	"src/golang_testWork2/internal/exel"
 	"time"
 )
 
@@ -28,27 +30,31 @@ func (h *Handlers) HandlerView() HandlerFunc {
 		if args["key"] != "" {
 			rec, err := h.cache.Get(args["key"])
 			if err == nil {
-				_, err := fmt.Fprintf(w, "%s:%s, %s\n", rec.Key, rec.Value, rec.CreationTime.Add(rec.TimeToLive).Sub(time.Now()))
+				creationTime := rec.CreationTime.Format(time.ANSIC)
+				TTL := rec.TimeToLive.Truncate(time.Second)
+				_, err = fmt.Fprintf(w, "%s:%s, %s %s\n", rec.Key, rec.Value, TTL, creationTime)
 				if err != nil {
-					log.Println(err)
+					log.Panicln(err)
 					return
 				}
 			} else {
 				_, err := fmt.Fprintf(w, err.Error())
 				if err != nil {
-					log.Println(err)
+					log.Panicln(err)
 					return
 				}
 			}
 		} else {
 			all := h.cache.GetAll()
 			str := ""
-			for _, d := range all {
-				str = str + fmt.Sprintf("%s:%s, %s\n", d.Key, d.Value, d.CreationTime.Add(d.TimeToLive).Sub(time.Now()))
+			for _, rec := range all {
+				creationTime := rec.CreationTime.Format(time.ANSIC)
+				TTL := rec.TimeToLive.Truncate(time.Second)
+				str = str + fmt.Sprintf("%s:%s, %s %s\n", rec.Key, rec.Value, TTL, creationTime)
 			}
 			_, err := fmt.Fprintf(w, str)
 			if err != nil {
-				log.Println(err)
+				log.Panicln(err)
 				return
 			}
 		}
@@ -62,12 +68,8 @@ func (h *Handlers) HandlerAdd() HandlerFunc {
 			if args["duration"] != "" {
 				ttl, err := time.ParseDuration(args["duration"] + "s")
 				if err != nil {
-					log.Println(err)
-					_, err := fmt.Fprintf(w, err.Error())
-					if err != nil {
-						log.Println(err)
-						return
-					}
+					log.Panicln(err)
+					return
 				}
 				h.cache.Add(record.New(args["key"], args["value"], ttl))
 			} else {
@@ -76,7 +78,7 @@ func (h *Handlers) HandlerAdd() HandlerFunc {
 		} else {
 			_, err := fmt.Fprintf(w, "No enough params\nUse /add?key=(yourKey)&val=(yourVal)")
 			if err != nil {
-				log.Println(err)
+				log.Panicln(err)
 				return
 			}
 		}
@@ -91,21 +93,21 @@ func (h *Handlers) HandlerRemove() HandlerFunc {
 			if err != nil {
 				_, err := fmt.Fprintf(w, "error: %s", err)
 				if err != nil {
-					log.Println(err)
+					log.Panicln(err)
 					return
 				}
 				return
 			} else {
 				_, err := fmt.Fprintf(w, "succes, key:%s", args["key"])
 				if err != nil {
-					log.Println(err)
+					log.Panicln(err)
 					return
 				}
 			}
 		} else {
 			_, err := fmt.Fprintf(w, "No enough params\nUse /remove?key=(yourKey)")
 			if err != nil {
-				log.Println(err)
+				log.Panicln(err)
 				return
 			}
 		}
@@ -114,13 +116,15 @@ func (h *Handlers) HandlerRemove() HandlerFunc {
 
 func (h *Handlers) HandlerFlush() HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		h.cache.Flush()
+		h.cache.ClearCache()
 	}
 }
 
 func (h *Handlers) HandlerExel() HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		http.ServeFile(w, r, filePath)
+		w.Header().Add("Content-Disposition", "Attachment")
+		data := h.cache.GetAll()
+		result := exel.Excel(data)
+		http.ServeContent(w, r, result.filename, time.Now(), bytes.NewReader(result.data))
 	}
 }

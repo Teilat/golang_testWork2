@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"src/golang_testWork2/api"
-	"src/golang_testWork2/cache"
+	"src/golang_testWork2/internal/cache"
 	"time"
 )
 

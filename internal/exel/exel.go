@@ -1,60 +1,57 @@
-package api
+package exel
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/xuri/excelize/v2"
 	"log"
-	"src/golang_testWork2/cache/record"
+	"src/golang_testWork2/internal/cache/record"
 	"strconv"
+	"time"
 )
+
+type ExelFile struct {
+	filename string
+	data     []byte
+}
 
 const sheetName = "Sheet1"
 
-func Excel(rec []*record.Record) *excelize.File {
+func Excel(rec []*record.Record) ExelFile {
 	f := excelize.NewFile()
 	err := f.SetCellValue(sheetName, "A1", "Ключ")
 	if err != nil {
-		log.Print(err)
-		return nil
+		log.Panicln(err)
+		return ExelFile{filename: "", data: nil}
 	}
 	err = f.SetCellValue(sheetName, "B1", "Значение")
 	if err != nil {
-		log.Print(err)
-		return nil
-	}
-	err = f.SetCellValue(sheetName, "C1", "Оставшееся время жизни")
-	if err != nil {
-		log.Print(err)
-		return nil
-	}
-	err = f.SetCellValue(sheetName, "D1", "Дата и время создания")
-	if err != nil {
-		log.Print(err)
-		return nil
+		log.Panicln(err)
+		return ExelFile{filename: "", data: nil}
 	}
 	for i, r := range rec {
 		err := f.SetCellValue(sheetName, makeAxis(0, i+1), r.Key)
 		if err != nil {
-			log.Print(err)
-			return nil
+			log.Panicln(err)
+			return ExelFile{filename: "", data: nil}
 		}
 		err = f.SetCellValue(sheetName, makeAxis(1, i+1), r.Value)
 		if err != nil {
-			log.Print(err)
-			return nil
-		}
-		err = f.SetCellValue(sheetName, makeAxis(2, i+1), r.TimeToLive.String())
-		if err != nil {
-			log.Print(err)
-			return nil
-		}
-		err = f.SetCellValue(sheetName, makeAxis(3, i+1), r.CreationTime)
-		if err != nil {
-			log.Print(err)
-			return nil
+			log.Panicln(err)
+			return ExelFile{filename: "", data: nil}
 		}
 	}
-	return f
+	var b bytes.Buffer
+	writer := bufio.NewWriter(&b)
+	err = f.Write(writer)
+	if err != nil {
+		log.Panicln(err)
+		return ExelFile{filename: "", data: nil}
+	}
+	fileName := "cache_data_" + time.Now().String() + ".xlsx"
+	return ExelFile{filename: fileName, data: b.Bytes()}
+
 }
 
 func makeAxis(x, y int) string {

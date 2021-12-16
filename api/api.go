@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"src/golang_testWork2/api/handler"
-	"src/golang_testWork2/cache"
+	"src/golang_testWork2/internal/cache"
 )
 
 func Init(cache *cache.Cache) {
@@ -24,6 +24,8 @@ func Init(cache *cache.Cache) {
 
 	router.Path("/remove").Queries("key", "{key}").HandlerFunc(handlers.HandlerRemove())
 	router.Path("/remove").HandlerFunc(handlers.HandlerRemove())
+
+	router.Path("/exel").HandlerFunc(handlers.HandlerExel())
 
 	log.Println("started")
 	log.Fatal(http.ListenAndServe(":80", router))

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"src/golang_testWork2/cache/record"
+	"src/golang_testWork2/internal/cache/record"
 	"time"
 )
 
@@ -24,9 +24,10 @@ func New(ctx context.Context, ticker time.Ticker) *Cache {
 
 //Get возвращает запись по заданному ключу
 func (v Cache) Get(key string) (*record.Record, error) {
-	res := v.data[key]
-	if res != nil {
-		return res, nil
+	rec := v.data[key]
+	rec.TimeToLive = rec.CreationTime.Add(rec.TimeToLive).Sub(time.Now())
+	if rec != nil {
+		return rec, nil
 	} else {
 		return nil, fmt.Errorf("невозможно получить запись. Запись с заданим ключем не существует, ключ:%s", key)
 	}
@@ -35,8 +36,9 @@ func (v Cache) Get(key string) (*record.Record, error) {
 //GetAll возвращает все записи из хранилища в виде списка
 func (v Cache) GetAll() []*record.Record {
 	res := make([]*record.Record, 0)
-	for _, i2 := range v.data {
-		res = append(res, i2)
+	for _, rec := range v.data {
+		rec.TimeToLive = rec.CreationTime.Add(rec.TimeToLive).Sub(time.Now())
+		res = append(res, rec)
 	}
 	return res
 }
@@ -59,9 +61,15 @@ func (v Cache) Remove(key string) error {
 	}
 }
 
-// Flush очищает хранилище с оперативными данными
-func (v Cache) Flush() {
-	v.data = make(map[string]*record.Record, 0)
+//ClearCache очищает хранилище с оперативными данными
+func (v Cache) ClearCache() {
+	for k := range v.data {
+		err := v.Remove(k)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+	}
 }
 
 //ProcessTimer запускается в горутине и проверяет каждую запись на истечение по времени
@@ -80,7 +88,6 @@ func (v Cache) ProcessTimer() {
 						}
 					}
 				}
-				//log.Print("done")
 			}()
 		case <-v.context.Done():
 			return
