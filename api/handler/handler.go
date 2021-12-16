@@ -117,3 +117,10 @@ func (h *Handlers) HandlerFlush() HandlerFunc {
 		h.cache.Flush()
 	}
 }
+
+func (h *Handlers) HandlerExel() HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		http.ServeFile(w, r, filePath)
+	}
+}
