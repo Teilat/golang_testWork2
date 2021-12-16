@@ -22,23 +22,23 @@ func Excel(rec []*record.Record) ExelFile {
 	f := excelize.NewFile()
 	err := f.SetCellValue(sheetName, "A1", "Ключ")
 	if err != nil {
-		log.Panicln(err)
+		log.Println(err)
 		return ExelFile{"", nil}
 	}
 	err = f.SetCellValue(sheetName, "B1", "Значение")
 	if err != nil {
-		log.Panicln(err)
+		log.Println(err)
 		return ExelFile{"", nil}
 	}
 	for i, r := range rec {
 		err := f.SetCellValue(sheetName, makeAxis(0, i+1), r.Key)
 		if err != nil {
-			log.Panicln(err)
+			log.Println(err)
 			return ExelFile{"", nil}
 		}
 		err = f.SetCellValue(sheetName, makeAxis(1, i+1), r.Value)
 		if err != nil {
-			log.Panicln(err)
+			log.Println(err)
 			return ExelFile{"", nil}
 		}
 	}
@@ -46,11 +46,11 @@ func Excel(rec []*record.Record) ExelFile {
 	writer := bufio.NewWriter(&b)
 	err = f.Write(writer)
 	if err != nil {
-		log.Panicln(err)
+		log.Println(err)
 		return ExelFile{"", nil}
 	}
 	fileName := "cache_data_" + time.Now().String() + ".xlsx"
-	return ExelFile{fileName, nil}
+	return ExelFile{fileName, b.Bytes()}
 
 }
 
