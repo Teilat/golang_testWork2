@@ -25,8 +25,9 @@ func New(ctx context.Context, ticker time.Ticker) *Cache {
 //Get возвращает запись по заданному ключу
 func (v Cache) Get(key string) (*record.Record, error) {
 	rec := v.data[key]
-	rec.TimeToLive = rec.CreationTime.Add(rec.TimeToLive).Sub(time.Now())
 	if rec != nil {
+		//приведение к актуальному оставшемуся времени
+		rec.TimeToLive = rec.CreationTime.Add(rec.TimeToLive).Sub(time.Now())
 		return rec, nil
 	} else {
 		return nil, fmt.Errorf("невозможно получить запись. Запись с заданим ключем не существует, ключ:%s", key)
@@ -62,14 +63,14 @@ func (v Cache) Remove(key string) error {
 }
 
 //ClearCache очищает хранилище с оперативными данными
-func (v Cache) ClearCache() {
+func (v Cache) ClearCache() error {
 	for k := range v.data {
 		err := v.Remove(k)
 		if err != nil {
-			log.Print(err)
-			return
+			return err
 		}
 	}
+	return nil
 }
 
 //ProcessTimer запускается в горутине и проверяет каждую запись на истечение по времени

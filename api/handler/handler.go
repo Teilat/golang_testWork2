@@ -116,7 +116,11 @@ func (h *Handlers) HandlerRemove() HandlerFunc {
 
 func (h *Handlers) HandlerFlush() HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		h.cache.ClearCache()
+		err := h.cache.ClearCache()
+		if err != nil {
+			log.Print(err)
+			return
+		}
 	}
 }
 
